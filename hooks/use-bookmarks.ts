@@ -130,6 +130,11 @@ export function useBookmarks(userId: string | undefined) {
       .eq("id", id);
 
     if (deleteError) return { error: deleteError.message };
+
+    // Optimistically remove from local state so the item disappears immediately
+    // instead of waiting for the realtime DELETE event
+    setBookmarks((prev) => prev.filter((b) => b.id !== id));
+
     return { error: null };
   }, []);
 
