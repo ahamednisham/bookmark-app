@@ -54,7 +54,7 @@ export default function AddBookmarkForm({ onAdd }: AddBookmarkFormProps) {
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Paste a URL…"
           required
-          className="h-11 flex-1 rounded-xl border border-white/10 bg-white/4 px-4 text-sm text-white placeholder:text-zinc-500 transition focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30"
+          className="h-11 w-full sm:flex-1 sm:w-auto rounded-xl border border-white/10 bg-white/4 px-4 text-sm text-white placeholder:text-zinc-500 transition focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30"
         />
 
         {/* Title input */}
@@ -63,14 +63,14 @@ export default function AddBookmarkForm({ onAdd }: AddBookmarkFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Title (optional)"
-          className="h-11 rounded-xl border border-white/10 bg-white/4 px-4 text-sm text-white placeholder:text-zinc-500 transition focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 sm:w-48"
+          className="h-11 w-full rounded-xl border border-white/10 bg-white/4 px-4 text-sm text-white placeholder:text-zinc-500 transition focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 sm:w-48"
         />
 
         {/* Submit button */}
         <button
           type="submit"
           disabled={loading || !url.trim()}
-          className="flex h-11 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-indigo-500 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-11 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-linear-to-r from-indigo-500 to-violet-600 px-5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
