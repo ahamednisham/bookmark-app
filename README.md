@@ -2,6 +2,12 @@
 
 A modern, real-time bookmark manager built with **Next.js 16**, **React 19**, and **Supabase**. Save, organize, and manage your bookmarks from anywhere with instant sync across devices.
 
+## ⚡ Important Considerations
+
+One of the main challenges I faced when working with this app was the cross browser sync. Supabase/Postgres Realtime DELETE events do not include the user_id column in the old record by default (only the Primary Key was being sent). The subscription was filtering by user_id=eq.${userId}, so the client ignores the DELETE events.
+
+The solution? run ```bash ALTER TABLE bookmarks REPLICA IDENTITY FULL; ``` in the Supabase SQL editor. This ensures that the Realtime DELETE events also include user_id column thus allowing the client to filter out the events for the current user even if its delete.
+
 ## ✨ Features
 
 - **Google OAuth** — One-click sign-in via Supabase Auth
