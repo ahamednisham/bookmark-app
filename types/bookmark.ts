@@ -6,6 +6,7 @@ export interface Bookmark {
   favicon_url: string | null;
   created_at: string;
   updated_at: string;
+  isOptimistic?: boolean;
 }
 
 export type BookmarkInsert = Pick<Bookmark, "url" | "title"> &

@@ -26,12 +26,12 @@ export default function AddBookmarkForm({ onAdd }: AddBookmarkFormProps) {
       ? trimmedUrl
       : `https://${trimmedUrl}`;
 
-    // Derive a title from the URL if left blank
-    const derivedTitle =
-      title.trim() || new URL(fullUrl).hostname.replace(/^www\./, "");
+    // If title is blank, leave it blank; the hook/backend will handle the fallback + fetch
+    const finalTitle = title.trim();
 
     setLoading(true);
-    const result = await onAdd({ url: fullUrl, title: derivedTitle });
+    // Pass the raw title (even if empty) to onAdd
+    const result = await onAdd({ url: fullUrl, title: finalTitle });
     setLoading(false);
 
     if (result.error) {
@@ -58,13 +58,15 @@ export default function AddBookmarkForm({ onAdd }: AddBookmarkFormProps) {
         />
 
         {/* Title input */}
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Title (optional)"
-          className="h-11 w-full rounded-xl border border-white/10 bg-white/4 px-4 text-sm text-white placeholder:text-zinc-500 transition focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 sm:w-48"
-        />
+        <div className="relative w-full sm:w-48">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Title (optional)"
+            className="h-11 w-full rounded-xl border border-white/10 bg-white/4 px-4 text-sm text-white placeholder:text-zinc-500 transition focus:border-indigo-500/50 focus:outline-none focus:ring-1 focus:ring-indigo-500/30"
+          />
+        </div>
 
         {/* Submit button */}
         <button

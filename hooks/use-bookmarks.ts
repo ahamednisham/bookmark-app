@@ -53,7 +53,10 @@ export function useBookmarks(userId: string | undefined) {
         },
         (payload) => {
           const newBookmark = payload.new as Bookmark;
-          setBookmarks((prev) => [newBookmark, ...prev]);
+          setBookmarks((prev) => {
+            if (prev.some((b) => b.id === newBookmark.id)) return prev;
+            return [newBookmark, ...prev];
+          });
         }
       )
       .on(
@@ -93,22 +96,8 @@ export function useBookmarks(userId: string | undefined) {
   }, [userId]);
 
   const safeBookmarks = userId ? bookmarks : [];
-  const safeLoading   = userId ? loading   : false;
-  const safeError     = userId ? error     : null;
-
-  const addBookmark = useCallback(
-    async (bookmark: BookmarkInsert) => {
-      if (!userId) return { error: "Not authenticated" };
-
-      const { error: insertError } = await supabaseRef.current
-        .from("bookmarks")
-        .insert({ ...bookmark, user_id: userId });
-
-      if (insertError) return { error: insertError.message };
-      return { error: null };
-    },
-    [userId]
-  );
+  const safeLoading = userId ? loading : false;
+  const safeError = userId ? error : null;
 
   const updateBookmark = useCallback(
     async (id: string, updates: BookmarkUpdate) => {
@@ -122,6 +111,83 @@ export function useBookmarks(userId: string | undefined) {
     },
     []
   );
+
+  const addBookmark = useCallback(
+    async (bookmark: BookmarkInsert) => {
+      if (!userId) return { error: "Not authenticated" };
+
+      const tempId = `temp-${crypto.randomUUID()}`;
+      const fallbackTitle =
+        bookmark.title ||
+        (() => {
+          try {
+            return new URL(bookmark.url).hostname.replace(/^www\./, "");
+          } catch {
+            return bookmark.url;
+          }
+        })();
+
+      const optimisticBookmark: Bookmark = {
+        id: tempId,
+        user_id: userId,
+        url: bookmark.url,
+        title: fallbackTitle,
+        favicon_url: bookmark.favicon_url || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        isOptimistic: true,
+      };
+
+      setBookmarks((prev) => [optimisticBookmark, ...prev]);
+
+      try {
+        let finalTitle = bookmark.title;
+        if (!finalTitle) {
+          try {
+            const res = await fetch(
+              `/api/fetch-title?url=${encodeURIComponent(bookmark.url)}`
+            );
+            const data = await res.json();
+            if (data.title) {
+              finalTitle = data.title;
+            } else {
+              finalTitle = fallbackTitle;
+            }
+          } catch {
+            finalTitle = fallbackTitle;
+          }
+        }
+
+        const { data, error: insertError } = await supabaseRef.current
+          .from("bookmarks")
+          .insert({
+            ...bookmark,
+            title: finalTitle,
+            user_id: userId,
+          })
+          .select()
+          .single();
+
+        if (insertError) throw new Error(insertError.message);
+
+        setBookmarks((prev) => {
+          if (prev.some((b) => b.id === data.id)) {
+            return prev.filter((b) => b.id !== tempId);
+          }
+          return prev.map((b) => (b.id === tempId ? data : b));
+        });
+
+        return { error: null };
+      } catch (err) {
+        setBookmarks((prev) => prev.filter((b) => b.id !== tempId));
+        const message = err instanceof Error ? err.message : "Failed to add bookmark";
+        return { error: message };
+      }
+    },
+    [userId]
+  );
+
+
 
   const deleteBookmark = useCallback(async (id: string) => {
     const { error: deleteError } = await supabaseRef.current
