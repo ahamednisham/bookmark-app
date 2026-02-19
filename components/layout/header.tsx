@@ -33,10 +33,12 @@ export default function Header() {
           {user && (
             <div className="hidden items-center gap-2.5 sm:flex">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white">
-                {user.email?.charAt(0).toUpperCase() ?? "?"}
+                {(user.user_metadata?.full_name ?? user.email)
+                  ?.charAt(0)
+                  .toUpperCase() ?? "?"}
               </div>
               <span className="max-w-[160px] truncate text-sm text-zinc-400">
-                {user.email}
+                {user.user_metadata?.full_name ?? user.email}
               </span>
             </div>
           )}
