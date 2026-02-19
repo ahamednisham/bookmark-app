@@ -24,7 +24,8 @@ export async function GET(req: NextRequest) {
     const title = match?.[1]?.trim().replace(/\s+/g, " ") ?? null;
 
     return NextResponse.json({ title });
-  } catch {
+  } catch (error) {
+    console.error("Title fetch error:", error);
     return NextResponse.json({ title: null });
   }
 }

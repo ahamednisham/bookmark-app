@@ -5,18 +5,21 @@ import { useState } from "react";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
+    setError(null);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error: authError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=/`,
       },
     });
-    if (error) {
-      console.error("Login error:", error.message);
+    if (authError) {
+      console.error("Login error:", authError.message);
+      setError(authError.message);
       setLoading(false);
     }
   };
@@ -55,6 +58,12 @@ export default function LoginPage() {
               Sign in to save and organize your bookmarks
             </p>
           </div>
+
+          {error && (
+            <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-center text-sm text-red-400">
+              {error}
+            </div>
+          )}
 
           {/* Divider */}
           <div className="mb-6 h-px bg-linear-to-r from-transparent via-white/10 to-transparent" />

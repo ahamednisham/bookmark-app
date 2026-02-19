@@ -179,6 +179,7 @@ export function useBookmarks(userId: string | undefined) {
 
         return { error: null };
       } catch (err) {
+        console.error("Failed to add bookmark:", err);
         setBookmarks((prev) => prev.filter((b) => b.id !== tempId));
         const message = err instanceof Error ? err.message : "Failed to add bookmark";
         return { error: message };
