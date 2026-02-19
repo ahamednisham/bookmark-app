@@ -46,45 +46,27 @@ export function useBookmarks(userId: string | undefined) {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "bookmarks",
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          const newBookmark = payload.new as Bookmark;
-          setBookmarks((prev) => {
-            if (prev.some((b) => b.id === newBookmark.id)) return prev;
-            return [newBookmark, ...prev];
-          });
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "bookmarks",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const updated = payload.new as Bookmark;
-          setBookmarks((prev) =>
-            prev.map((b) => (b.id === updated.id ? updated : b))
-          );
-        }
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "DELETE",
-          schema: "public",
-          table: "bookmarks",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const deletedId = (payload.old as Partial<Bookmark>).id;
-          setBookmarks((prev) => prev.filter((b) => b.id !== deletedId));
+          if (payload.eventType === "INSERT") {
+            const newBookmark = payload.new as Bookmark;
+            setBookmarks((prev) => {
+              if (prev.some((b) => b.id === newBookmark.id)) return prev;
+              return [newBookmark, ...prev];
+            });
+          } else if (payload.eventType === "UPDATE") {
+            const updated = payload.new as Bookmark;
+            setBookmarks((prev) =>
+              prev.map((b) => (b.id === updated.id ? updated : b))
+            );
+          } else if (payload.eventType === "DELETE") {
+            const deletedId = (payload.old as Partial<Bookmark>).id;
+            setBookmarks((prev) => prev.filter((b) => b.id !== deletedId));
+          }
         }
       )
       .subscribe();
